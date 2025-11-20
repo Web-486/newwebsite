@@ -34,7 +34,7 @@ function initParticleSystem() {
         particle.style.animationDelay = animationDelay + 's';
         
         // 随机颜色
-        const colors = [
+const colors = [
             'rgba(255, 255, 255, 0.4)',
             'rgba(102, 126, 234, 0.3)',
             'rgba(255, 255, 255, 0.6)',
@@ -147,19 +147,158 @@ function initDrawingWall() {
     const clearCanvas = document.getElementById('clearCanvas');
     const saveDrawing = document.getElementById('saveDrawing');
     const colorOptions = document.querySelectorAll('.color-option');
+    const brushTypeBtns = document.querySelectorAll('.brush-type-btn');
+    const backgroundOptions = document.querySelectorAll('.background-option');
+    const resizeHandle = document.getElementById('resizeHandle');
+    const sizeDisplay = document.getElementById('sizeDisplay');
+    const canvasContainer = document.querySelector('.drawing-canvas-container');
     
     let isDrawing = false;
+    let isResizing = false;
     let lastX = 0;
     let lastY = 0;
+    let currentBrushType = 'normal';
+    let currentBackground = 'white';
+    let originalCanvasData = null;
     
-    // 设置画布背景
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // 设置画布背景（保持不变）
+    function setCanvasBackground(bgType) {
+        currentBackground = bgType;
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        switch(bgType) {
+            case 'grid':
+                drawGridBackground();
+                break;
+            case 'gradient':
+                drawGradientBackground();
+                break;
+            case 'paper':
+                drawPaperBackground();
+                break;
+            case 'sky':
+                drawSkyBackground();
+                break;
+            default:
+                // 纯白背景，什么都不做
+                break;
+        }
+    }
+    
+    // 网格背景
+    function drawGridBackground() {
+        const gridSize = 20;
+        const gridColor = '#f0f0f0';
+        
+        ctx.strokeStyle = gridColor;
+        ctx.lineWidth = 0.5;
+        
+        // 绘制水平线
+        for (let y = gridSize; y < canvas.height; y += gridSize) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(canvas.width, y);
+            ctx.stroke();
+        }
+        
+        // 绘制垂直线
+        for (let x = gridSize; x < canvas.width; x += gridSize) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, canvas.height);
+            ctx.stroke();
+        }
+        
+        // 添加中心点
+        ctx.fillStyle = '#ddd';
+        ctx.beginPath();
+        ctx.arc(canvas.width / 2, canvas.height / 2, 2, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    
+    // 渐变背景
+    function drawGradientBackground() {
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, '#f8f9fa');
+        gradient.addColorStop(1, '#e9ecef');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+// 添加一些装饰性圆点
+        ctx.fillStyle = 'rgba(102, 126, 234, 0.1)';
+        for (let i = 0; i < 50; i++) {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            const size = Math.random() * 10 + 5;
+            
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+    
+    // 纸张纹理背景
+    function drawPaperBackground() {
+        // 基础纸张颜色
+        ctx.fillStyle = '#fefefe';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // 添加纸张纹理
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.02)';
+        for (let i = 0; i < 1000; i++) {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            const size = Math.random() * 2 + 0.5;
+            
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // 添加轻微阴影
+        const shadowGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        shadowGradient.addColorStop(0, 'rgba(0, 0, 0, 0.02)');
+        shadowGradient.addColorStop(1, 'rgba(0, 0, 0, 0.05)');
+        
+        ctx.fillStyle = shadowGradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+// 天空背景
+    function drawSkyBackground() {
+        // 天空渐变
+        const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        skyGradient.addColorStop(0, '#87CEEB');
+        skyGradient.addColorStop(1, '#E0F7FA');
+        
+        ctx.fillStyle = skyGradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // 添加云朵
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        
+        // 云朵1
+        drawCloud(canvas.width * 0.2, canvas.height * 0.3, 40);
+        // 云朵2
+        drawCloud(canvas.width * 0.7, canvas.height * 0.2, 30);
+        // 云朵3
+        drawCloud(canvas.width * 0.4, canvas.height * 0.1, 35);
+    }
+    
+    // 绘制云朵
+    function drawCloud(x, y, size) {
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.arc(x + size * 0.8, y - size * 0.2, size * 0.8, 0, Math.PI * 2);
+        ctx.arc(x + size * 1.5, y, size * 0.9, 0, Math.PI * 2);
+        ctx.arc(x + size * 0.8, y + size * 0.3, size * 0.7, 0, Math.PI * 2);
+        ctx.fill();
+    }
     
     // 调整画布大小以适应容器
-    function resizeCanvas() {
-        const container = canvas.parentElement;
-        const maxWidth = container.clientWidth - 40; // 减去padding
+function resizeCanvasToContainer() {
+        const container = canvasContainer;
+        const maxWidth = container.clientWidth - 40;
         const ratio = canvas.width / canvas.height;
         
         if (maxWidth < canvas.width) {
@@ -169,12 +308,146 @@ function initDrawingWall() {
             canvas.style.width = canvas.width + 'px';
             canvas.style.height = canvas.height + 'px';
         }
+        
+        // 重新绘制背景
+        setCanvasBackground(currentBackground);
+        updateSizeDisplay();
     }
     
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
+    // 更新尺寸显示
+    function updateSizeDisplay() {
+        sizeDisplay.textContent = `${canvas.width} × ${canvas.height}`;
+    }
     
-    // 画笔设置
+    // 调整画布尺寸
+    function resizeCanvas(newWidth, newHeight) {
+        // 保存当前画布内容
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        tempCtx.drawImage(canvas, 0, 0);
+        
+        // 设置新尺寸
+        canvas.width = Math.max(400, Math.min(2000, newWidth));
+        canvas.height = Math.max(300, Math.min(1500, newHeight));
+        
+        // 恢复画布内容
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(tempCanvas, 0, 0);
+        
+        // 重新绘制背景
+        setCanvasBackground(currentBackground);
+        updateSizeDisplay();
+        resizeCanvasToContainer();
+    }
+    
+    // 初始化画布
+    setCanvasBackground('white');
+    setBrushColor('#667eea');
+    setBrushSize(5);
+    setBrushType('normal');
+    updateSizeDisplay();
+    resizeCanvasToContainer();
+    
+    // 抓手控件事件处理
+    resizeHandle.addEventListener('mousedown', startResizing);
+    
+    function startResizing(e) {
+        e.preventDefault();
+        isResizing = true;
+        
+        // 保存原始画布数据
+        originalCanvasData = {
+            width: canvas.width,
+            height: canvas.height,
+            x: e.clientX,
+            y: e.clientY
+        };
+        
+        // 添加视觉反馈
+        canvasContainer.classList.add('canvas-resizing');
+        document.body.style.cursor = 'nwse-resize';
+        document.body.style.userSelect = 'none';
+        
+        // 添加事件监听
+        document.addEventListener('mousemove', handleResizing);
+        document.addEventListener('mouseup', stopResizing);
+    }
+    
+    function handleResizing(e) {
+        if (!isResizing) return;
+        
+        const deltaX = e.clientX - originalCanvasData.x;
+        const deltaY = e.clientY - originalCanvasData.y;
+        
+        // 计算新的画布尺寸（保持宽高比）
+        const aspectRatio = originalCanvasData.width / originalCanvasData.height;
+        let newWidth = originalCanvasData.width + deltaX;
+        let newHeight = originalCanvasData.height + deltaY;
+        
+        // 保持宽高比
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            newHeight = newWidth / aspectRatio;
+        } else {
+newWidth = newHeight * aspectRatio;
+        }
+        
+        // 限制最小和最大尺寸
+        newWidth = Math.max(400, Math.min(2000, newWidth));
+        newHeight = Math.max(300, Math.min(1500, newHeight));
+        
+        // 实时预览尺寸
+        sizeDisplay.textContent = `${Math.round(newWidth)} × ${Math.round(newHeight)}`;
+        sizeDisplay.style.opacity = '1';
+    }
+    
+    function stopResizing(e) {
+        if (!isResizing) return;
+        
+        isResizing = false;
+        
+        const deltaX = e.clientX - originalCanvasData.x;
+        const deltaY = e.clientY - originalCanvasData.y;
+        
+        // 计算最终尺寸
+        const aspectRatio = originalCanvasData.width / originalCanvasData.height;
+        let newWidth = originalCanvasData.width + deltaX;
+        let newHeight = originalCanvasData.height + deltaY;
+        
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            newHeight = newWidth / aspectRatio;
+        } else {
+            newWidth = newHeight * aspectRatio;
+        }
+        
+        // 应用新尺寸
+        resizeCanvas(Math.round(newWidth), Math.round(newHeight));
+        
+        // 清理状态
+        canvasContainer.classList.remove('canvas-resizing');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        sizeDisplay.style.opacity = '';
+        
+        // 移除事件监听
+        document.removeEventListener('mousemove', handleResizing);
+        document.removeEventListener('mouseup', stopResizing);
+    }
+    
+    // 触摸设备支持
+    resizeHandle.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        startResizing(e.touches[0]);
+    });
+    
+    // 窗口大小变化时重新调整画布
+    window.addEventListener('resize', function() {
+        resizeCanvasToContainer();
+    });
+    
+    // 画笔设置（保持不变）
     function setBrushColor(color) {
         ctx.strokeStyle = color;
         colorPicker.value = color;
@@ -187,31 +460,48 @@ function initDrawingWall() {
         brushSizeValue.textContent = size + 'px';
     }
     
-    // 初始化画笔
-    setBrushColor('#667eea');
-    setBrushSize(5);
-    
-    // 事件监听
-    colorPicker.addEventListener('input', function() {
-        setBrushColor(this.value);
-    });
-    
-    brushSize.addEventListener('input', function() {
-        setBrushSize(parseInt(this.value));
-    });
-    
-    colorOptions.forEach(option => {
-        option.addEventListener('click', function() {
-            const color = this.getAttribute('data-color');
-            setBrushColor(color);
-            colorOptions.forEach(opt => opt.classList.remove('active'));
-            this.classList.add('active');
+    function setBrushType(type) {
+        currentBrushType = type;
+        brushTypeBtns.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('data-brush') === type) {
+                btn.classList.add('active');
+            }
         });
-    });
+        
+        if (type === 'soft') {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.globalAlpha = 0.6;
+        } else {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.globalAlpha = 1.0;
+        }
+    }
     
+    function setBackground(bgType) {
+        setCanvasBackground(bgType);
+        backgroundOptions.forEach(option => {
+            option.classList.remove('active');
+if (option.getAttribute('data-bg') === bgType) {
+                option.classList.add('active');
+            }
+        });
+    }
+    
+    // 绘画功能（保持不变）
+    function startDrawing(e) {
+        if (isResizing) return;
+        isDrawing = true;
+        
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
     // 绘画功能
     function startDrawing(e) {
+        if (isResizing) return;
         isDrawing = true;
+        
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
@@ -221,7 +511,7 @@ function initDrawingWall() {
     }
     
     function draw(e) {
-        if (!isDrawing) return;
+        if (!isDrawing || isResizing) return;
         
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
@@ -237,8 +527,6 @@ function initDrawingWall() {
         
         lastX = currentX;
         lastY = currentY;
-        
-        // 更新涂鸦数量
         updateDrawingCount();
     }
     
@@ -246,45 +534,12 @@ function initDrawingWall() {
         isDrawing = false;
     }
     
-    // 触摸设备支持
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', stopDrawing);
-    canvas.addEventListener('mouseout', stopDrawing);
-    
-    canvas.addEventListener('touchstart', function(e) {
-        e.preventDefault();
-        startDrawing(e.touches[0]);
-    });
-    
-    canvas.addEventListener('touchmove', function(e) {
-        e.preventDefault();
-        draw(e.touches[0]);
-    });
-    
-    canvas.addEventListener('touchend', stopDrawing);
-    
-    // 清空画布
-    clearCanvas.addEventListener('click', function() {
-        if (confirm('确定要清空画布吗？')) {
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-    });
-    
-    // 保存涂鸦
-    saveDrawing.addEventListener('click', function() {
-        const dataURL = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.download = '青春涂鸦-' + new Date().toLocaleDateString() + '.png';
-        link.href = dataURL;
-        link.click();
-        
-        showNotification('涂鸦已保存！');
-    });
+
+
+
 }
 
-// 留言墙功能
+// 留言墙功能 - 使用真实后端API
 function initMessageWall() {
     const messageForm = document.querySelector('.message-form');
     const userName = document.getElementById('userName');
@@ -292,6 +547,17 @@ function initMessageWall() {
     const charRemaining = document.getElementById('charRemaining');
     const submitMessage = document.getElementById('submitMessage');
     const messagesContainer = document.getElementById('messagesContainer');
+    
+    // 检查后端连接状态
+    async function checkBackendStatus() {
+        try {
+            await youthApiClient.getMessages({ limit: 1 });
+            return true;
+        } catch (error) {
+            console.warn('后端服务器未启动，使用本地存储模式');
+            return false;
+        }
+    }
     
     // 字符计数
     messageContent.addEventListener('input', function() {
@@ -301,7 +567,7 @@ function initMessageWall() {
     });
     
     // 提交留言
-    submitMessage.addEventListener('click', function() {
+    submitMessage.addEventListener('click', async function() {
         const content = messageContent.value.trim();
         const name = userName.value.trim() || '匿名青年';
         
@@ -315,47 +581,224 @@ function initMessageWall() {
             return;
         }
         
-        addMessage(name, content);
+        const isBackendOnline = await checkBackendStatus();
         
-        // 清空表单
-        messageContent.value = '';
-        userName.value = '';
-        charRemaining.textContent = '200';
-        charRemaining.style.color = '#666';
-        
-        // 更新留言数量
-        updateMessageCount();
-        
-        showNotification('留言发布成功！');
+        try {
+            let result;
+            if (isBackendOnline) {
+                // 使用真实后端API
+                result = await YouthMessageAPI.createMessage({
+                    author: name,
+                    content: content
+                });
+            } else {
+                // 后端离线，使用本地存储
+                result = await createMessageLocal(name, content);
+            }
+            
+            if (result.success) {
+                addMessageToPage(result.data);
+                messageContent.value = '';
+                userName.value = '';
+                charRemaining.textContent = '200';
+                charRemaining.style.color = '#666';
+                updateMessageCount();
+                showNotification('留言发布成功！');
+            } else {
+                showNotification(result.error || '发布失败');
+            }
+        } catch (error) {
+            console.error('发布留言失败:', error);
+            showNotification('发布失败，请重试');
+        }
     });
     
-    // 添加留言到页面
-    function addMessage(name, content) {
+    // 本地存储备用方案
+    async function createMessageLocal(author, content) {
+        return new Promise((resolve) => {
+            // 简单的本地存储实现
+            let messages = JSON.parse(localStorage.getItem('localMessages') || '[]');
+            const newMessage = {
+                id: 'local_' + Date.now(),
+                author,
+                content,
+                timestamp: new Date().toISOString(),
+                likes: 0,
+                replies: []
+            };
+            
+            messages.unshift(newMessage);
+            localStorage.setItem('localMessages', JSON.stringify(messages.slice(0, 50)));
+            
+            resolve({ success: true, data: newMessage });
+        });
+    }
+    
+    // 加载留言
+    async function loadMessages() {
+        const isBackendOnline = await checkBackendStatus();
+        
+        try {
+            let result;
+            if (isBackendOnline) {
+                result = await YouthMessageAPI.getMessages({ limit: 50 });
+            } else {
+                result = await loadMessagesLocal();
+            }
+            
+            if (result.success) {
+                messagesContainer.innerHTML = '';
+                
+                if (result.data.messages.length === 0) {
+                    messagesContainer.innerHTML = '<div class="no-messages">暂无留言，快来留下你的青春寄语吧！</div>';
+                    return;
+                }
+                
+                result.data.messages.forEach(msg => {
+                    addMessageToPage(msg);
+                });
+                
+                messageCount.textContent = result.data.pagination?.total || result.data.messages.length;
+            }
+        } catch (error) {
+            console.error('加载留言失败:', error);
+            messagesContainer.innerHTML = '<div class="no-messages">加载留言失败</div>';
+        }
+    }
+    
+    // 本地加载备用方案
+    async function loadMessagesLocal() {
+        return new Promise((resolve) => {
+            const messages = JSON.parse(localStorage.getItem('localMessages') || '[]');
+            resolve({
+                success: true,
+                data: {
+                    messages: messages,
+                    pagination: { total: messages.length }
+                }
+            });
+        });
+    }
+    
+    // 留言显示函数（保持不变）
+    function addMessageToPage(messageData) {
         const messageItem = document.createElement('div');
         messageItem.className = 'message-item';
+        messageItem.setAttribute('data-message-id', messageData.id);
         
-        const timestamp = new Date().toLocaleString();
+        const localTime = new Date(messageData.timestamp).toLocaleString();
         
         messageItem.innerHTML = `
             <div class="message-header">
-                <span class="message-author">${escapeHtml(name)}</span>
-                <span class="message-time">${timestamp}</span>
+                <span class="message-author">${escapeHtml(messageData.author)}</span>
+                <span class="message-time" title="${messageData.timestamp}">${localTime}</span>
+                <span class="message-id">#${messageData.id.substr(4, 8)}</span>
             </div>
-            <div class="message-content">${escapeHtml(content)}</div>
+            <div class="message-content">${escapeHtml(messageData.content)}</div>
+            <div class="message-footer">
+                <button class="like-btn" onclick="likeMessageAPI('${messageData.id}')">
+                    <span class="like-icon">❤️</span>
+                    <span class="like-count">${messageData.likes}</span>
+                </button>
+                <button class="reply-btn" onclick="showReplyFormAPI('${messageData.id}')">回复</button>
+                <button class="export-btn" onclick="exportMessageAPI('${messageData.id}')">导出</button>
+            </div>
+            ${messageData.replies.length > 0 ? `
+            <div class="replies-container">
+                ${messageData.replies.map(reply => `
+                    <div class="reply-item">
+                        <span class="reply-author">${escapeHtml(reply.author)}</span>
+                        <span class="reply-content">${escapeHtml(reply.content)}</span>
+                        <span class="reply-time">${new Date(reply.timestamp).toLocaleTimeString()}</span>
+                    </div>
+                `).join('')}
+            </div>
+            ` : ''}
         `;
         
-        // 移除"暂无留言"提示
-        const noMessages = messagesContainer.querySelector('.no-messages');
-        if (noMessages) {
-            noMessages.remove();
-        }
-        
-        // 添加到顶部
-        messagesContainer.insertBefore(messageItem, messagesContainer.firstChild);
-        
-        // 保存到本地存储
-        saveMessageToLocal({ name, content, timestamp });
+        messagesContainer.appendChild(messageItem);
     }
+    
+    // 全局API函数
+    window.likeMessageAPI = async function(messageId) {
+        try {
+            const result = await YouthMessageAPI.likeMessage(messageId);
+            if (result.success) {
+                const likeCount = document.querySelector(`[data-message-id="${messageId}"] .like-count`);
+                if (likeCount) {
+                    likeCount.textContent = result.data.likes;
+                }
+                showNotification('点赞成功！');
+            } else {
+                showNotification(result.error || '点赞失败');
+            }
+        } catch (error) {
+            showNotification('网络错误');
+        }
+    };
+    
+    window.showReplyFormAPI = async function(messageId) {
+        const reply = prompt('请输入回复内容：');
+        if (reply && reply.trim()) {
+            try {
+                const result = await YouthMessageAPI.replyToMessage(messageId, {
+                    author: '我',
+                    content: reply.trim()
+                });
+                
+                if (result.success) {
+                    showNotification('回复成功！');
+                    // 重新加载留言列表
+                    loadMessages();
+                } else {
+                    showNotification(result.error || '回复失败');
+                }
+            } catch (error) {
+                showNotification('网络错误');
+            }
+        }
+    };
+    
+    window.exportMessageAPI = async function(messageId) {
+        try {
+            const result = await YouthMessageAPI.exportData();
+            if (result.success) {
+                const message = result.data.messages.find(msg => msg.id === messageId);
+                if (message) {
+                    const jsonStr = JSON.stringify(message, null, 2);
+                    const blob = new Blob([jsonStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `message_${messageId}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    showNotification('留言已导出为JSON文件！');
+                }
+            }
+        } catch (error) {
+            showNotification('导出失败');
+        }
+    };
+    
+    window.exportAllMessagesAPI = async function() {
+        try {
+            const result = await YouthMessageAPI.exportData();
+            if (result.success) {
+                const jsonStr = JSON.stringify(result.data, null, 2);
+                const blob = new Blob([jsonStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `youth_messages_${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showNotification('所有留言数据已导出为JSON文件！');
+            }
+        } catch (error) {
+            showNotification('导出失败');
+        }
+    };
     
     // 转义HTML
     function escapeHtml(text) {
@@ -364,28 +807,8 @@ function initMessageWall() {
         return div.innerHTML;
     }
     
-    // 本地存储功能
-    function saveMessageToLocal(message) {
-        let messages = JSON.parse(localStorage.getItem('youthMessages') || '[]');
-        messages.unshift(message);
-        
-        // 只保留最近50条留言
-        if (messages.length > 50) {
-            messages = messages.slice(0, 50);
-        }
-        
-        localStorage.setItem('youthMessages', JSON.stringify(messages));
-    }
-    
-    function loadMessagesFromLocal() {
-        const messages = JSON.parse(localStorage.getItem('youthMessages') || '[]');
-        messages.forEach(msg => {
-            addMessage(msg.name, msg.content);
-        });
-    }
-    
     // 页面加载时读取留言
-    loadMessagesFromLocal();
+    loadMessages();
 }
 
 // 统计功能
@@ -579,44 +1002,50 @@ function showNotification(message) {
 }
 
 // 添加CSS动画
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-    
-    @keyframes slideUp {
-        from { 
-            opacity: 0;
-            transform: translateY(30px);
+function addCSSAnimations() {
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
-        to { 
-            opacity: 1;
-            transform: translateY(0);
+        
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-    }
-    
-    @keyframes slideInRight {
-        from { 
-            opacity: 0;
-            transform: translateX(100%);
+        
+        @keyframes slideInRight {
+            from { 
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to { 
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
-        to { 
-            opacity: 1;
-            transform: translateX(0);
+        
+        @keyframes slideOutRight {
+            from { 
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to { 
+                opacity: 0;
+                transform: translateX(100%);
+            }
         }
-    }
-    
-    @keyframes slideOutRight {
-        from { 
-            opacity: 1;
-            transform: translateX(0);
-        }
-        to { 
-            opacity: 0;
-            transform: translateX(100%);
-        }
-    }
-`;
-document.head.appendChild(style);
+    `;
+    document.head.appendChild(style);
+}
+
+// 初始化CSS动画
+addCSSAnimations();
+}

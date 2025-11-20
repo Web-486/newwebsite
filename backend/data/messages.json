@@ -1,0 +1,78 @@
+{
+  "messages": [
+    {
+      "id": "614c2666-aaae-47e3-98be-f8a05191c68f",
+      "author": "111111111111",
+      "content": "111",
+      "timestamp": "2025-11-20T04:29:31.329Z",
+      "likes": 0,
+      "replies": [],
+      "status": "published",
+      "ip": "::ffff:127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0"
+    },
+    {
+      "id": "e49a1166-8890-4d6c-ba3d-4cd43c974cf0",
+      "author": "匿名青年",
+      "content": "111",
+      "timestamp": "2025-11-20T04:29:01.701Z",
+      "likes": 0,
+      "replies": [],
+      "status": "published",
+      "ip": "::ffff:127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0"
+    },
+    {
+      "id": "27819c8f-dfdc-41d8-a35c-67b4bdb19f07",
+      "author": "111",
+      "content": "1111",
+      "timestamp": "2025-11-20T04:28:13.399Z",
+      "likes": 1,
+      "replies": [
+        {
+          "id": "a9cc199c-2573-43f5-b2a3-fbdadd1e7873",
+          "author": "我",
+          "content": "1111",
+          "timestamp": "2025-11-20T04:28:25.584Z"
+        }
+      ],
+      "status": "published",
+      "ip": "::ffff:127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0"
+    },
+    {
+      "id": "200f52ef-b09e-4e89-8a5a-1d99d78dd146",
+      "author": "1",
+      "content": "1",
+      "timestamp": "2025-11-20T04:28:00.908Z",
+      "likes": 1,
+      "replies": [
+        {
+          "id": "bd436407-683c-4f40-958c-9f084d31cb5c",
+          "author": "我",
+          "content": "111",
+          "timestamp": "2025-11-20T04:28:21.876Z"
+        }
+      ],
+      "status": "published",
+      "ip": "::ffff:127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0"
+    }
+  ],
+  "metadata": {
+    "totalMessages": 4,
+    "lastUpdate": "2025-11-20T04:29:31.329Z",
+    "version": "1.0",
+    "created": "2025-11-20T03:18:06.093Z"
+  },
+  "statistics": {
+    "totalLikes": 2,
+    "totalReplies": 2,
+    "activeUsers": [
+      "1",
+      "111",
+      "匿名青年",
+      "111111111111"
+    ]
+  }
+}

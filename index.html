@@ -72,6 +72,33 @@
 
           <div class="drawing-tools">
             <div class="tool-group">
+              <label>画笔类型：</label>
+              <div class="brush-types">
+                <button class="brush-type-btn active" data-brush="normal">
+                  普通笔刷
+                </button>
+                <button class="brush-type-btn" data-brush="soft">
+                  软边笔刷
+                </button>
+              </div>
+            </div>
+
+            <div class="tool-group">
+              <label>背景样式：</label>
+              <div class="background-presets">
+                <button class="background-option active" data-bg="white">
+                  纯白
+                </button>
+                <button class="background-option" data-bg="grid">网格</button>
+                <button class="background-option" data-bg="gradient">
+                  渐变
+                </button>
+                <button class="background-option" data-bg="paper">纸张</button>
+                <button class="background-option" data-bg="sky">天空</button>
+              </div>
+            </div>
+
+            <div class="tool-group">
               <label>画笔颜色：</label>
               <input type="color" id="colorPicker" value="#667eea" />
               <div class="color-presets">
@@ -122,6 +149,21 @@
 
           <div class="drawing-canvas-container">
             <canvas id="drawingCanvas" width="800" height="400"></canvas>
+            <!-- 抓手控件 -->
+            <div class="canvas-resize-handle" id="resizeHandle">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M20,9H18V4H16V9H14V11H16V16H18V11H20V9Z M10,4H8V9H6V11H8V16H10V11H12V9H10V4Z M4,18H6V20H4V18Z M8,18H10V20H8V18Z M12,18H14V20H12V18Z M16,18H18V20H16V18Z M20,18H22V20H20V18Z"
+                />
+              </svg>
+            </div>
+            <!-- 画布尺寸显示 -->
+            <div class="canvas-size-display" id="sizeDisplay">800 × 400</div>
           </div>
         </div>
       </section>
@@ -131,33 +173,35 @@
         <div class="container">
           <h2 class="section-title">青春留言墙</h2>
           <p class="section-subtitle">分享你的青春故事与梦想</p>
-
-          <div class="message-form">
-            <div class="form-group">
-              <input
-                type="text"
-                id="userName"
-                placeholder="你的昵称（可选）"
-                maxlength="20"
-              />
-            </div>
-            <div class="form-group">
-              <textarea
-                id="messageContent"
-                placeholder="写下你的青春寄语或梦想..."
-                maxlength="200"
-              ></textarea>
-              <div class="char-count">
-                <span id="charRemaining">200</span> 字剩余
-              </div>
-            </div>
-            <button id="submitMessage" class="submit-button">发布留言</button>
+          <div class="message-stats">
+            <span>已收到 <span id="messageCount">0</span> 条青春寄语</span>
           </div>
 
-          <div class="messages-container" id="messagesContainer">
-            <!-- 留言将动态显示在这里 -->
-            <div class="no-messages">暂无留言，快来分享你的故事吧！</div>
+        <div class="message-form">
+          <div class="form-group">
+            <input
+              type="text"
+              id="userName"
+              placeholder="你的昵称（可选）"
+              maxlength="20"
+            />
           </div>
+          <div class="form-group">
+            <textarea
+              id="messageContent"
+              placeholder="写下你的青春寄语或梦想..."
+              maxlength="200"
+            ></textarea>
+            <div class="char-count">
+              <span id="charRemaining">200</span> 字剩余
+            </div>
+          </div>
+          <button id="submitMessage" class="submit-button">发布留言</button>
+        </div>
+
+        <div class="messages-container" id="messagesContainer">
+          <!-- 留言将动态显示在这里 -->
+          <div class="no-messages">暂无留言，快来分享你的故事吧！</div>
         </div>
       </section>
     </main>
@@ -168,6 +212,8 @@
       </div>
     </footer>
 
+    <!-- 在页面底部引入 -->
+    <script src="js/api_client.js"></script>
     <script src="js/AI_main.js"></script>
   </body>
 </html>
