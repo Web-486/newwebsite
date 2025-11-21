@@ -8,13 +8,17 @@
     "build": "vite build",
     "preview": "vite preview",
     "server": "node server.js",
-    "start": "npm run build && npm run server"
+    "server-ws": "node server-with-websocket.js",
+    "start": "npm run build && npm run server-ws",
+    "start-dev": "npm run server-ws"
   },
   "dependencies": {
-    "vue": "^3.5.24",
-    "vue-router": "^4.6.3",
+    "cors": "^2.8.5",
     "express": "^4.18.2",
-    "cors": "^2.8.5"
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
+    "vue": "^3.5.24",
+    "vue-router": "^4.6.3"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.1",

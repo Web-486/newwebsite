@@ -160,6 +160,10 @@ export default {
     name: 'YouthDream',
     data() {
         return {
+            // WebSocket连接
+            socket: null,
+            userId: null,
+
             // 统计数据
             onlineCount: 0,
             drawingCount: 0,
@@ -243,22 +247,25 @@ export default {
         this.initMessageWall()
         this.initDrawingCanvas()
         this.loadDrawingCount() // 加载涂鸦数量
+        this.initWebSocket() // 初始化WebSocket连接
         this.updateStatistics()
-        this.initOnlineUsers()
 
         // 定期清理过期用户
         setInterval(() => {
             this.cleanupExpiredUsers()
         }, 60000) // 每分钟清理一次
     },
+
     beforeUnmount() {
+        if (this.socket) {
+            this.socket.disconnect()
+        }
         if (this.particleInterval) {
             clearInterval(this.particleInterval)
         }
         if (this.activityInterval) {
             clearInterval(this.activityInterval)
         }
-        // 移除事件监听器
         if (this.activityHandler) {
             document.removeEventListener('mousemove', this.activityHandler)
             document.removeEventListener('keydown', this.activityHandler)
@@ -284,21 +291,34 @@ export default {
                 return;
             }
 
-            try {
-                const newMessage = await addMessage({
-                    author: this.userName,
-                    content: this.messageContent
-                });
+            const messageData = {
+                content: this.messageContent,
+                timestamp: new Date().toISOString(),
+                userName: this.userName || '匿名用户',
+                userAvatar: this.getRandomAvatar()
+            };
 
-                this.messages.unshift(newMessage);
+            // 如果WebSocket连接正常，通过WebSocket发送
+            if (this.socket && this.socket.connected) {
+                this.socket.emit('addMessage', messageData);
                 this.messageContent = '';
                 this.charRemaining = 200;
                 this.showNotification('留言发布成功！');
+            } else {
+                // 回退到HTTP API
+                try {
+                    const newMessage = await addMessage(messageData);
 
-                await this.updateStatistics();
-            } catch (error) {
-                console.error('发布留言失败:', error);
-                this.showNotification('留言发布失败，请重试');
+                    this.messages.unshift(newMessage);
+                    this.messageContent = '';
+                    this.charRemaining = 200;
+                    this.showNotification('留言发布成功！');
+
+                    await this.updateStatistics();
+                } catch (error) {
+                    console.error('发布留言失败:', error);
+                    this.showNotification('留言发布失败，请重试');
+                }
             }
         },
 
@@ -349,6 +369,76 @@ export default {
             } catch (error) {
                 console.error('更新用户活动状态失败:', error);
             }
+        },
+
+        // WebSocket初始化
+        initWebSocket() {
+            const socketUrl = process.env.NODE_ENV === 'production'
+                ? window.location.origin
+                : 'http://localhost:3003';
+
+            // 导入socket.io客户端
+            import('socket.io-client').then(({ io }) => {
+                this.socket = io(socketUrl);
+
+                // 生成用户ID
+                this.userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+                // 监听连接成功
+                this.socket.on('connect', () => {
+                    console.log('WebSocket连接成功');
+
+                    // 发送用户登录信息
+                    this.socket.emit('userLogin', {
+                        userId: this.userId,
+                        userName: this.userName || '匿名用户'
+                    });
+
+                    // 设置活动监听器
+                    this.setupActivityListeners();
+                });
+
+                // 监听在线人数更新
+                this.socket.on('onlineCountUpdate', (data) => {
+                    this.onlineCount = data.onlineCount;
+                });
+
+                // 监听统计数据更新
+                this.socket.on('statsUpdate', (stats) => {
+                    this.messageCount = stats.totalMessages;
+                });
+
+                // 监听新留言
+                this.socket.on('messageAdded', (newMessage) => {
+                    this.messages.unshift(newMessage);
+                });
+
+                // 监听连接错误
+                this.socket.on('connect_error', (error) => {
+                    console.error('WebSocket连接失败:', error);
+                    // 回退到本地存储方案
+                    this.initOnlineUsers();
+                });
+            }).catch(error => {
+                console.error('加载socket.io失败:', error);
+                // 回退到本地存储方案
+                this.initOnlineUsers();
+            });
+        },
+
+        // 用户活动监听（WebSocket版本）
+        setupActivityListeners() {
+            this.activityHandler = () => {
+                if (this.socket && this.socket.connected) {
+                    this.socket.emit('userActivity', {
+                        userId: this.userId
+                    });
+                }
+            };
+
+            document.addEventListener('mousemove', this.activityHandler);
+            document.addEventListener('keydown', this.activityHandler);
+            document.addEventListener('click', this.activityHandler);
         },
 
         // 粒子系统
@@ -713,7 +803,7 @@ export default {
         async updateStatistics() {
             try {
                 const stats = await getMessageStats()
-                this.messageCount = stats.total
+                this.messageCount = stats.totalMessages
                 // 涂鸦数量已经在saveDrawing和loadDrawingCount中处理
                 // 这里不需要再设置drawingCount
             } catch (error) {
@@ -727,65 +817,6 @@ export default {
 </script>
 
 <style scoped>
-/* 导入原有的CSS样式 */
-@import url('../../css/AI_style.css');
-
-/* 组件特定的样式 */
-.youth-dream-page {
-    position: relative;
-    min-height: 100vh;
-}
-
-/* 模态框样式 */
-.inspiration-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    animation: fadeIn 0.3s ease;
-}
-
-.modal-content {
-    background: white;
-    padding: 40px;
-    border-radius: 15px;
-    text-align: center;
-    max-width: 500px;
-    margin: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    animation: slideUp 0.3s ease;
-}
-
-.quote-text {
-    font-size: 1.3rem;
-    color: #667eea;
-    margin-bottom: 20px;
-    line-height: 1.6;
-    font-weight: 500;
-}
-
-.close-button {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    padding: 10px 25px;
-    border-radius: 25px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-.close-button:hover {
-    transform: scale(1.05);
-}
-
-
 /* 导入原有的CSS样式 */
 @import url('../../css/AI_style.css');
 

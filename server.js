@@ -57,8 +57,13 @@ app.post('/api/messages', (req, res) => {
   const { author, content } = req.body;
   const data = readData();
   
+  // 计算新的顺序id（当前最大id + 1）
+  const maxId = data.messages.length > 0 
+    ? Math.max(...data.messages.map(msg => msg.id))
+    : 0;
+  
   const newMessage = {
-    id: Date.now(),
+    id: maxId + 1,
     author: author || '',
     content: content,
     timestamp: Date.now()

@@ -1,10 +1,11 @@
-// 云端留言API服务（适配Netlify部署）
-const API_BASE_URL = '';
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? '' 
+  : 'http://localhost:3003';
 
 // 获取留言列表
 export async function getMessages() {
   try {
-    const response = await fetch('/api/messages');
+    const response = await fetch(`${API_BASE_URL}/api/messages`);
     if (!response.ok) throw new Error('获取留言失败');
     return await response.json();
   } catch (error) {
@@ -16,7 +17,7 @@ export async function getMessages() {
 // 添加新留言
 export async function addMessage(message) {
   try {
-    const response = await fetch('/api/messages', {
+    const response = await fetch(`${API_BASE_URL}/api/messages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -35,7 +36,7 @@ export async function addMessage(message) {
 // 获取统计数据
 export async function getMessageStats() {
   try {
-    const response = await fetch('/api/statistics');
+    const response = await fetch(`${API_BASE_URL}/api/statistics`);
     if (!response.ok) throw new Error('获取统计数据失败');
     const stats = await response.json();
     return {
@@ -50,7 +51,7 @@ export async function getMessageStats() {
 // 更新在线用户
 export async function updateOnlineUser(userData) {
   try {
-    const response = await fetch('/api/online-users', {
+    const response = await fetch(`${API_BASE_URL}/api/online-users`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
