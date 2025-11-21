@@ -1,0 +1,23 @@
+{
+  "messages": [
+    {
+      "id": 1,
+      "author": "青春追梦者",
+      "content": "青春是用来奋斗的，不是用来挥霍的！让我们一起加油！",
+      "timestamp": 1735718400000
+    },
+    {
+      "id": 2,
+      "author": "追梦少年666",
+      "content": "每一次努力都是向梦想靠近的一步，坚持就是胜利！",
+      "timestamp": 1735804800000
+    }
+  ],
+  "drawings": [],
+  "onlineUsers": [],
+  "statistics": {
+    "totalMessages": 2,
+    "totalDrawings": 0,
+    "totalVisitors": 0
+  }
+}

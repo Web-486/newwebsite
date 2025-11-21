@@ -1,0 +1,241 @@
+<!--
+请生成一个以“青春追梦”为主题的静态网页HTML代码。
+要求：
+- 布局简洁大气，适配手机和电脑（响应式）
+- 包含标题、一段励志文案、一个按钮
+- 使用语义化标签（如 header、section）
+- 引入外部CSS文件 AI_style.css 和 JS 文件 AI_main.js
+- 主色调为蓝白渐变，字体使用无衬线体
+- 内容积极向上，体现青年奋斗精神
+- 文件命名规范，便于教学管理
+-->
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>青春追梦 - 青年奋斗正当时</title>
+    <link rel="stylesheet" href="css/AI_style.css" />
+  </head>
+  <body>
+    <!-- 粒子动画容器 -->
+    <div id="particlesContainer" class="particles-container"></div>
+
+    <header class="hero-section">
+      <div class="container">
+        <h1 class="main-title">青春追梦</h1>
+        <p class="subtitle">奋斗的青春最美丽</p>
+        <div class="stats-bar">
+          <div class="stat-item">
+            <span class="stat-number" id="onlineCount">0</span>
+            <span class="stat-label">在线人数</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number" id="drawingCount">0</span>
+            <span class="stat-label">涂鸦数量</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number" id="messageCount">0</span>
+            <span class="stat-label">留言数量</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="inspiration-section">
+        <div class="container">
+          <div class="content-wrapper">
+            <h2 class="section-title">青春寄语</h2>
+            <div class="inspiration-text">
+              <p>
+                青春是生命中最绚烂的篇章，是梦想起航的港湾。在这个充满无限可能的年纪，我们怀揣着对未来的憧憬，肩负着时代的使命。
+              </p>
+              <p>
+                每一次奋斗都是青春的注脚，每一次坚持都是梦想的阶梯。不要畏惧前方的风雨，因为正是这些历练让我们变得更加坚强。
+              </p>
+              <p>
+                让青春在奋斗中闪光，让梦想在坚持中绽放。相信自己，勇往直前，你就是那个能够改变世界的人！
+              </p>
+            </div>
+            <button class="cta-button" id="dreamButton">开启追梦之旅</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 涂鸦墙区域 -->
+      <section class="drawing-section">
+        <div class="container">
+          <h2 class="section-title">创意涂鸦墙</h2>
+          <p class="section-subtitle">用色彩描绘你的青春梦想</p>
+
+          <div class="drawing-tools">
+            <div class="tool-group">
+              <label>画笔颜色：</label>
+              <input type="color" id="colorPicker" value="#667eea" />
+              <div class="color-presets">
+                <div
+                  class="color-option"
+                  data-color="#667eea"
+                  style="background-color: #667eea"
+                ></div>
+                <div
+                  class="color-option"
+                  data-color="#e74c3c"
+                  style="background-color: #e74c3c"
+                ></div>
+                <div
+                  class="color-option"
+                  data-color="#2ecc71"
+                  style="background-color: #2ecc71"
+                ></div>
+                <div
+                  class="color-option"
+                  data-color="#f39c12"
+                  style="background-color: #f39c12"
+                ></div>
+                <div
+                  class="color-option"
+                  data-color="#9b59b6"
+                  style="background-color: #9b59b6"
+                ></div>
+                <div
+                  class="color-option"
+                  data-color="#000000"
+                  style="background-color: #000000"
+                ></div>
+              </div>
+            </div>
+
+            <div class="tool-group">
+              <label>画笔大小：</label>
+              <input type="range" id="brushSize" min="1" max="20" value="5" />
+              <span id="brushSizeValue">5px</span>
+            </div>
+
+            <div class="tool-group">
+              <button id="clearCanvas" class="tool-button">清空画布</button>
+              <button id="saveDrawing" class="tool-button">保存涂鸦</button>
+            </div>
+
+            <div class="tool-group">
+              <label>画布背景：</label>
+              <div class="background-presets">
+                <div
+                  class="background-option active"
+                  data-background="white"
+                  style="background-color: white; border: 1px solid #ccc"
+                ></div>
+                <div
+                  class="background-option"
+                  data-background="grid"
+                  style="
+                    background-image: linear-gradient(
+                        #e0e0e0 1px,
+                        transparent 1px
+                      ),
+                      linear-gradient(90deg, #e0e0e0 1px, transparent 1px);
+                    background-size: 20px 20px;
+                  "
+                ></div>
+                <div
+                  class="background-option"
+                  data-background="dots"
+                  style="
+                    background-image: radial-gradient(
+                      #e0e0e0 1px,
+                      transparent 1px
+                    );
+                    background-size: 20px 20px;
+                  "
+                ></div>
+                <div
+                  class="background-option"
+                  data-background="gradient"
+                  style="
+                    background: linear-gradient(
+                      135deg,
+                      #f5f7fa 0%,
+                      #c3cfe2 100%
+                    );
+                  "
+                ></div>
+                <div
+                  class="background-option"
+                  data-background="paper"
+                  style="
+                    background-color: #f5f5dc;
+                    background-image: linear-gradient(
+                      #e0e0e0 1px,
+                      transparent 1px
+                    );
+                    background-size: 20px 20px;
+                  "
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="drawing-canvas-container">
+            <canvas id="drawingCanvas" width="800" height="400"></canvas>
+            <!-- 画布大小调节按钮 -->
+            <div class="canvas-resize-handle" id="canvasResizeHandle">
+              <div class="resize-triangle"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 留言墙区域 -->
+      <section class="message-section">
+        <div class="container">
+          <h2 class="section-title">青春留言墙</h2>
+          <p class="section-subtitle">分享你的青春故事与梦想</p>
+
+          <div class="message-form">
+            <div class="form-group">
+              <input
+                type="text"
+                id="userName"
+                placeholder="你的昵称（可选）"
+                maxlength="20"
+              />
+            </div>
+            <div class="form-group">
+              <textarea
+                id="messageContent"
+                placeholder="写下你的青春寄语或梦想..."
+                maxlength="200"
+              ></textarea>
+              <div class="char-count">
+                <span id="charRemaining">200</span> 字剩余
+              </div>
+            </div>
+            <button id="submitMessage" class="submit-button">发布留言</button>
+          </div>
+
+          <div class="messages-container" id="messagesContainer">
+            <!-- 留言将动态显示在这里 -->
+            <div class="no-messages">暂无留言，快来分享你的故事吧！</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer-section">
+      <div class="container">
+        <p>&copy; 2025 青春追梦 - 青年奋斗正当时</p>
+      </div>
+    </footer>
+
+    <!-- 引入拆分后的JS文件 -->
+    <script src="js/utils.js"></script>
+    <script src="js/particleSystem.js"></script>
+    <script src="js/dreamButton.js"></script>
+    <script src="js/drawingWall.js"></script>
+    <script src="js/messageWall.js"></script>
+    <script src="js/statistics.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>
