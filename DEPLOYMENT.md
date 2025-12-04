@@ -1,8 +1,8 @@
-# 青春梦想留言墙 - 部署指南
+# IAA 协会主页 - 部署指南
 
 ## 项目概述
 
-青春梦想留言墙是一个基于 Vue 3 + Vite + Express + Socket.IO 的实时留言应用，支持在线人数统计、实时留言更新等功能。
+IAA 协会主页是一个基于 Vue 3 + Vite + Express + Socket.IO 的现代化协会网站，包含协会介绍、团队展示、活动中心和实时留言墙等功能。
 
 ## 部署方式
 
@@ -36,7 +36,7 @@
    ```bash
    # 使用git克隆项目
    git clone <your-repo-url>
-   cd vite-project3
+   cd IAA-homepage
 
    # 或者使用FTP/SFTP上传项目文件
    ```
@@ -81,7 +81,7 @@
 
    # 或者使用PM2进行进程管理（生产环境推荐）
    npm install -g pm2
-   pm2 start npm --name "youthdream" -- run start-dev
+   pm2 start npm --name "IAA-homepage" -- run start-dev
    pm2 save
    pm2 startup
    ```
@@ -93,7 +93,7 @@
    sudo apt install nginx -y
 
    # 创建Nginx配置文件
-   sudo nano /etc/nginx/sites-available/youthdream
+   sudo nano /etc/nginx/sites-available/IAA-homepage
    ```
 
    配置文件内容：
@@ -136,7 +136,7 @@
    启用站点：
 
    ```bash
-   sudo ln -s /etc/nginx/sites-available/youthdream /etc/nginx/sites-enabled/
+   sudo ln -s /etc/nginx/sites-available/IAA-homepage /etc/nginx/sites-enabled/
    sudo nginx -t
    sudo systemctl reload nginx
    ```
@@ -174,13 +174,13 @@ CMD ["npm", "run", "start-dev"]
 ```yaml
 version: "3.8"
 services:
-  youthdream:
+  iaa-homepage:
     build: .
     ports:
       - "3003:3003"
     environment:
       - NODE_ENV=production
-      - PORT=3001
+      - PORT=3003
     restart: unless-stopped
     volumes:
       - ./data:/app/data
@@ -257,7 +257,7 @@ docker-compose down
 
    ```bash
    # 使用PM2日志管理
-   pm2 logs youthdream
+   pm2 logs iaa-homepage
 
    # 或配置自定义日志
    npm install winston
@@ -326,13 +326,13 @@ cp data.json data-backup-$(date +%Y%m%d).json
 
 ```bash
 # 停止服务
-pm2 stop youthdream
+pm2 stop IAA-homepage
 
 # 恢复备份
 cp backup-file.json data.json
 
 # 重启服务
-pm2 start youthdream
+pm2 start IAA-homepage
 ```
 
 ## 安全建议
@@ -348,7 +348,7 @@ pm2 start youthdream
 
    ```bash
    # 只开放必要端口
-   ufw allow 80,443,3001
+   ufw allow 80,443,3003
    ufw enable
    ```
 

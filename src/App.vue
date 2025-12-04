@@ -6,7 +6,7 @@
         <!-- 网站Logo -->
         <div class="nav-logo">
           <router-link to="/" class="logo-link">
-            <span class="logo-text">DreamSpace</span>
+            <span class="logo-text">互联网应用协会</span>
           </router-link>
         </div>
 
@@ -24,11 +24,31 @@
               <span class="nav-text">关于</span>
             </router-link>
           </li>
+
+          <li class="nav-item">
+            <router-link to="/activity" class="nav-link">
+              <span class="nav-icon">📅</span>
+              <span class="nav-text">活动</span>
+            </router-link>
+          </li>
+
           <li class="nav-item">
             <router-link to="/youth-dream" class="nav-link">
               <span class="nav-icon">✨</span>
               <span class="nav-text">青春追梦</span>
             </router-link>
+          </li>
+
+          <!-- 登录/注销选项 -->
+          <li class="nav-item">
+            <button v-if="!isLoggedIn" @click="openLoginModal" class="nav-link login-btn">
+              <span class="nav-icon">🔑</span>
+              <span class="nav-text">登录</span>
+            </button>
+            <button v-else @click="logout" class="nav-link logout-btn">
+              <span class="nav-icon">🚪</span>
+              <span class="nav-text">注销</span>
+            </button>
           </li>
         </ul>
 
@@ -41,9 +61,27 @@
       </div>
     </nav>
 
+    <!-- 登录模态框 -->
+    <el-dialog v-model="loginModalVisible" title="管理员登录" width="400px" :close-on-click-modal="false">
+      <el-form :model="loginForm" :rules="loginRules" ref="loginFormRef" label-width="80px">
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="loginForm.username" placeholder="请输入用户名" />
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="loginForm.password" type="password" placeholder="请输入密码" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="loginModalVisible = false">取消</el-button>
+          <el-button type="primary" @click="login">登录</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
     <!-- 主要内容区域 -->
     <main class="main-content">
-      <router-view></router-view>
+      <router-view :isLoggedIn="isLoggedIn" />
     </main>
   </div>
 </template>
@@ -53,8 +91,22 @@ export default {
   name: 'App',
   data() {
     return {
-      isMobileMenuOpen: false
+      isMobileMenuOpen: false,
+      isLoggedIn: false,
+      loginModalVisible: false,
+      loginForm: {
+        username: '',
+        password: ''
+      },
+      loginRules: {
+        username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+        password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+      }
     }
+  },
+  created() {
+    // 页面加载时检查登录状态
+    this.checkLoginStatus()
   },
   methods: {
     toggleMobileMenu() {
@@ -63,6 +115,35 @@ export default {
       if (navMenu) {
         navMenu.classList.toggle('active')
       }
+    },
+    openLoginModal() {
+      this.loginModalVisible = true
+    },
+    login() {
+      this.$refs.loginFormRef.validate((valid) => {
+        if (valid) {
+          // 这里使用简单的硬编码验证，实际项目中应该调用后端API
+          if (this.loginForm.username === 'root' && this.loginForm.password === '123456') {
+            // 登录成功，保存用户状态到localStorage
+            localStorage.setItem('isAdminLoggedIn', 'true')
+            this.isLoggedIn = true
+            this.loginModalVisible = false
+            this.$message.success('登录成功！')
+          } else {
+            this.$message.error('用户名或密码错误')
+          }
+        }
+      })
+    },
+    logout() {
+      // 清除登录状态
+      localStorage.removeItem('isAdminLoggedIn')
+      this.isLoggedIn = false
+      this.$message.success('已成功注销')
+    },
+    checkLoginStatus() {
+      // 从localStorage检查登录状态
+      this.isLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true'
     }
   },
   watch: {
@@ -73,6 +154,13 @@ export default {
       if (navMenu) {
         navMenu.classList.remove('active')
       }
+    }
+  },
+  provide() {
+    // 提供登录状态给子组件
+    return {
+      isLoggedIn: this.isLoggedIn,
+      logout: this.logout
     }
   }
 }
@@ -194,6 +282,24 @@ export default {
   font-size: 1rem;
 }
 
+/* 登录/注销按钮样式 */
+.login-btn,
+.logout-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  outline: none;
+}
+
+.logout-btn {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.logout-btn:hover {
+  background: rgba(255, 100, 100, 0.2);
+  color: white;
+}
+
 /* 移动端菜单按钮 */
 .nav-toggle {
   display: none;
@@ -215,6 +321,9 @@ export default {
 .main-content {
   flex: 1;
   padding-top: 0;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  background-size: cover;
+  background-attachment: fixed;
 }
 
 /* 响应式设计 */

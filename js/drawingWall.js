@@ -129,8 +129,85 @@ function initDrawingWall() {
     // 清空画布
     clearCanvas.addEventListener('click', function() {
         if (confirm('确定要清空画布吗？')) {
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // 使用当前选择的背景样式清空画布
+            const currentBackground = localStorage.getItem('canvasBackground') || 'white';
+            const backgroundStyles = {
+                'white': function(ctx, width, height) {
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(0, 0, width, height);
+                },
+                'grid': function(ctx, width, height) {
+                    // 绘制网格背景
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(0, 0, width, height);
+                    
+                    ctx.strokeStyle = '#e0e0e0';
+                    ctx.lineWidth = 1;
+                    
+                    // 绘制垂直线
+                    for (let x = 0; x <= width; x += 20) {
+                        ctx.beginPath();
+                        ctx.moveTo(x, 0);
+                        ctx.lineTo(x, height);
+                        ctx.stroke();
+                    }
+                    
+                    // 绘制水平线
+                    for (let y = 0; y <= height; y += 20) {
+                        ctx.beginPath();
+                        ctx.moveTo(0, y);
+                        ctx.lineTo(width, y);
+                        ctx.stroke();
+                    }
+                },
+                'dots': function(ctx, width, height) {
+                    // 绘制点状背景
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(0, 0, width, height);
+                    
+                    ctx.fillStyle = '#e0e0e0';
+                    
+                    for (let x = 10; x < width; x += 20) {
+                        for (let y = 10; y < height; y += 20) {
+                            ctx.beginPath();
+                            ctx.arc(x, y, 1, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+                },
+                'gradient': function(ctx, width, height) {
+                    // 绘制渐变背景
+                    const gradient = ctx.createLinearGradient(0, 0, width, height);
+                    gradient.addColorStop(0, '#f5f7fa');
+                    gradient.addColorStop(1, '#c3cfe2');
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, width, height);
+                },
+                'paper': function(ctx, width, height) {
+                    // 绘制纸张纹理背景
+                    ctx.fillStyle = '#f5f5dc';
+                    ctx.fillRect(0, 0, width, height);
+                    
+                    ctx.strokeStyle = '#e0e0e0';
+                    ctx.lineWidth = 1;
+                    
+                    // 绘制横线（类似笔记本纸张）
+                    for (let y = 20; y < height; y += 20) {
+                        ctx.beginPath();
+                        ctx.moveTo(0, y);
+                        ctx.lineTo(width, y);
+                        ctx.stroke();
+                    }
+                }
+            };
+            
+            if (backgroundStyles[currentBackground]) {
+                backgroundStyles[currentBackground](ctx, canvas.width, canvas.height);
+            } else {
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
         }
     });
     
@@ -186,13 +263,89 @@ function initCanvasResize() {
         const newHeight = Math.max(200, startHeight + deltaY);
         
         // 更新画布尺寸
-        canvas.width = newWidth;
-        canvas.height = newHeight;
-        
-        // 重新设置画布背景
-        const ctx = canvas.getContext('2d');
+    canvas.width = newWidth;
+    canvas.height = newHeight;
+    
+    // 重新设置画布背景为当前选择的背景样式
+    const ctx = canvas.getContext('2d');
+    const currentBackground = localStorage.getItem('canvasBackground') || 'white';
+    const backgroundStyles = {
+        'white': function(ctx, width, height) {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, width, height);
+        },
+        'grid': function(ctx, width, height) {
+            // 绘制网格背景
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, width, height);
+            
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            
+            // 绘制垂直线
+            for (let x = 0; x <= width; x += 20) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            
+            // 绘制水平线
+            for (let y = 0; y <= height; y += 20) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+        },
+        'dots': function(ctx, width, height) {
+            // 绘制点状背景
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, width, height);
+            
+            ctx.fillStyle = '#e0e0e0';
+            
+            for (let x = 10; x < width; x += 20) {
+                for (let y = 10; y < height; y += 20) {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        },
+        'gradient': function(ctx, width, height) {
+            // 绘制渐变背景
+            const gradient = ctx.createLinearGradient(0, 0, width, height);
+            gradient.addColorStop(0, '#f5f7fa');
+            gradient.addColorStop(1, '#c3cfe2');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+        },
+        'paper': function(ctx, width, height) {
+            // 绘制纸张纹理背景
+            ctx.fillStyle = '#f5f5dc';
+            ctx.fillRect(0, 0, width, height);
+            
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            
+            // 绘制横线（类似笔记本纸张）
+            for (let y = 20; y < height; y += 20) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+        }
+    };
+    
+    if (backgroundStyles[currentBackground]) {
+        backgroundStyles[currentBackground](ctx, newWidth, newHeight);
+    } else {
         ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, newWidth, newHeight);
+    }
         
         // 重新调整画布显示大小
         resizeCanvas();
@@ -252,15 +405,92 @@ function initCanvasResize() {
         const savedHeight = localStorage.getItem('canvasHeight');
         
         if (savedWidth && savedHeight) {
-            canvas.width = parseInt(savedWidth);
-            canvas.height = parseInt(savedHeight);
-            
-            const ctx = canvas.getContext('2d');
+        canvas.width = parseInt(savedWidth);
+        canvas.height = parseInt(savedHeight);
+        
+        // 重新设置画布背景为当前选择的背景样式
+        const ctx = canvas.getContext('2d');
+        const currentBackground = localStorage.getItem('canvasBackground') || 'white';
+        const backgroundStyles = {
+            'white': function(ctx, width, height) {
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, width, height);
+            },
+            'grid': function(ctx, width, height) {
+                // 绘制网格背景
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, width, height);
+                
+                ctx.strokeStyle = '#e0e0e0';
+                ctx.lineWidth = 1;
+                
+                // 绘制垂直线
+                for (let x = 0; x <= width; x += 20) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, height);
+                    ctx.stroke();
+                }
+                
+                // 绘制水平线
+                for (let y = 0; y <= height; y += 20) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(width, y);
+                    ctx.stroke();
+                }
+            },
+            'dots': function(ctx, width, height) {
+                // 绘制点状背景
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, width, height);
+                
+                ctx.fillStyle = '#e0e0e0';
+                
+                for (let x = 10; x < width; x += 20) {
+                    for (let y = 10; y < height; y += 20) {
+                        ctx.beginPath();
+                        ctx.arc(x, y, 1, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            },
+            'gradient': function(ctx, width, height) {
+                // 绘制渐变背景
+                const gradient = ctx.createLinearGradient(0, 0, width, height);
+                gradient.addColorStop(0, '#f5f7fa');
+                gradient.addColorStop(1, '#c3cfe2');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+            },
+            'paper': function(ctx, width, height) {
+                // 绘制纸张纹理背景
+                ctx.fillStyle = '#f5f5dc';
+                ctx.fillRect(0, 0, width, height);
+                
+                ctx.strokeStyle = '#e0e0e0';
+                ctx.lineWidth = 1;
+                
+                // 绘制横线（类似笔记本纸张）
+                for (let y = 20; y < height; y += 20) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(width, y);
+                    ctx.stroke();
+                }
+            }
+        };
+        
+        if (backgroundStyles[currentBackground]) {
+            backgroundStyles[currentBackground](ctx, canvas.width, canvas.height);
+        } else {
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            resizeCanvas();
         }
+        
+        resizeCanvas();
+    }
     }
     
     // 页面加载时调用

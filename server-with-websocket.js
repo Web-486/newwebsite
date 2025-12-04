@@ -19,7 +19,7 @@ const io = new Server(server, {
   }
 });
 
-const PORT = process.env.PORT || 3003;
+const PORT = process.env.PORT || 3004;
 const DATA_FILE = path.join(__dirname, 'data.json');
 
 // 在线用户管理
@@ -173,6 +173,26 @@ io.on('connection', (socket) => {
     }
   });
   
+  // 处理删除留言
+  socket.on('deleteMessage', (messageId) => {
+    const data = readData();
+    const messageIdInt = parseInt(messageId);
+    const messageIndex = data.messages.findIndex(msg => msg.id === messageIdInt);
+    
+    if (messageIndex !== -1) {
+      data.messages.splice(messageIndex, 1);
+      
+      if (writeData(data)) {
+        // 广播留言删除
+        io.emit('messageDeleted', messageIdInt);
+        
+        // 更新统计数据
+        const stats = updateStatistics();
+        io.emit('statsUpdate', stats);
+      }
+    }
+  });
+  
   // 断开连接
   socket.on('disconnect', () => {
     const userInfo = onlineUsers.get(socket.id);
@@ -232,10 +252,91 @@ app.post('/api/messages', (req, res) => {
   }
 });
 
+// 删除留言
+app.delete('/api/messages/:id', (req, res) => {
+  const data = readData();
+  const messageId = parseInt(req.params.id);
+  const messageIndex = data.messages.findIndex(msg => msg.id === messageId);
+  
+  if (messageIndex === -1) {
+    return res.status(404).json({ error: '留言不存在' });
+  }
+  
+  const deletedMessage = data.messages.splice(messageIndex, 1)[0];
+  
+  if (writeData(data)) {
+    // 广播留言删除
+    io.emit('messageDeleted', messageId);
+    
+    // 更新统计数据
+    const stats = updateStatistics();
+    io.emit('statsUpdate', stats);
+    
+    res.json({ success: true, deletedMessage });
+  } else {
+    res.status(500).json({ error: '删除留言失败' });
+  }
+});
+
 // 获取统计数据
 app.get('/api/statistics', (req, res) => {
   const data = readData();
   res.json(data.statistics);
+});
+
+// 更新在线用户
+app.post('/api/online-users', (req, res) => {
+  const { userId, userName } = req.body;
+  
+  // 生成一个唯一的会话ID
+  const sessionId = `http_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+  // 更新或添加用户信息
+  onlineUsers.set(sessionId, {
+    userId,
+    userName: userName || '匿名用户',
+    lastActive: Date.now(),
+    socketId: sessionId
+  });
+  
+  // 管理用户会话
+  if (!userSessions.has(userId)) {
+    userSessions.set(userId, []);
+  }
+  
+  userSessions.get(userId).push(sessionId);
+  
+  // 更新统计数据
+  const stats = updateStatistics();
+  io.emit('statsUpdate', stats);
+  broadcastOnlineCount();
+  
+  res.json({ onlineCount: onlineUsers.size });
+});
+
+// 保存涂鸦
+app.post('/api/drawings', (req, res) => {
+  const { drawingData } = req.body;
+  const data = readData();
+  
+  const newDrawing = {
+    id: Date.now(),
+    data: drawingData,
+    timestamp: Date.now()
+  };
+  
+  data.drawings.push(newDrawing);
+  data.statistics.totalDrawings = data.drawings.length;
+  
+  if (writeData(data)) {
+    // 更新统计数据
+    const stats = updateStatistics();
+    io.emit('statsUpdate', stats);
+    
+    res.json(newDrawing);
+  } else {
+    res.status(500).json({ error: '保存涂鸦失败' });
+  }
 });
 
 // 默认路由 - 服务前端页面

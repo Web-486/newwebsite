@@ -79,6 +79,26 @@ app.post('/api/messages', (req, res) => {
   }
 });
 
+// 删除留言
+app.delete('/api/messages/:id', (req, res) => {
+  const data = readData();
+  const messageId = parseInt(req.params.id);
+  const messageIndex = data.messages.findIndex(msg => msg.id === messageId);
+  
+  if (messageIndex === -1) {
+    return res.status(404).json({ error: '留言不存在' });
+  }
+  
+  const deletedMessage = data.messages.splice(messageIndex, 1)[0];
+  data.statistics.totalMessages = data.messages.length;
+  
+  if (writeData(data)) {
+    res.json({ success: true, deletedMessage });
+  } else {
+    res.status(500).json({ error: '删除留言失败' });
+  }
+});
+
 // 获取统计数据
 app.get('/api/statistics', (req, res) => {
   const data = readData();

@@ -125,6 +125,13 @@
                                     <span class="message-time">{{ formatTime(message.timestamp) }}</span>
                                 </div>
                                 <div class="message-content">{{ message.content }}</div>
+                                <!-- 管理员删除按钮（右下角） -->
+                                <div v-if="isLoggedIn" class="message-footer">
+                                    <el-button type="danger" size="small" @click="deleteMessage(message.id)"
+                                        class="delete-button">
+                                        删除
+                                    </el-button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -132,9 +139,10 @@
             </section>
         </main>
 
+        <el-divider />
         <footer class="footer-section">
             <div class="container">
-                <p>&copy; 2025 青春追梦 - 青年奋斗正当时</p>
+                <p>&copy; 2024-2025 互联网应用协会</p>
             </div>
         </footer>
 
@@ -154,10 +162,16 @@
 </template>
 
 <script>
-import { getMessages, addMessage, getMessageStats, updateOnlineUser } from '../api/cloudMessages.js'
+import { getMessages, addMessage, getMessageStats, updateOnlineUser, deleteMessage } from '../api/cloudMessages.js'
 
 export default {
     name: 'YouthDream',
+    props: {
+        isLoggedIn: {
+            type: Boolean,
+            default: false
+        }
+    },
     data() {
         return {
             // WebSocket连接
@@ -284,6 +298,37 @@ export default {
             }
         },
 
+        // 删除留言
+        async deleteMessage(messageId) {
+            try {
+                // 先从本地数组中删除（乐观更新）
+                this.messages = this.messages.filter(msg => msg.id !== messageId);
+
+                // 更新统计数据
+                this.messageCount = this.messages.length;
+
+                // 如果使用WebSocket，发送删除事件
+                if (this.socket && this.socket.connected) {
+                    this.socket.emit('deleteMessage', messageId);
+                    this.showNotification('留言删除成功！');
+                } else {
+                    // 回退到HTTP API
+                    try {
+                        await deleteMessage(messageId);
+                        this.showNotification('留言删除成功！');
+                    } catch (error) {
+                        console.error('删除留言失败:', error);
+                        // 如果API删除失败，恢复本地数据
+                        this.initMessageWall();
+                        this.showNotification('留言删除失败，请重试');
+                    }
+                }
+            } catch (error) {
+                console.error('删除留言失败:', error);
+                this.showNotification('留言删除失败，请重试');
+            }
+        },
+
         // 提交留言
         async submitMessage() {
             if (!this.messageContent.trim()) {
@@ -375,7 +420,7 @@ export default {
         initWebSocket() {
             const socketUrl = process.env.NODE_ENV === 'production'
                 ? window.location.origin
-                : 'http://localhost:3003';
+                : 'http://localhost:3004';
 
             // 导入socket.io客户端
             import('socket.io-client').then(({ io }) => {
@@ -411,6 +456,11 @@ export default {
                 // 监听新留言
                 this.socket.on('messageAdded', (newMessage) => {
                     this.messages.unshift(newMessage);
+                });
+
+                // 监听留言删除事件（用于实时同步删除操作）
+                this.socket.on('messageDeleted', (messageId) => {
+                    this.messages = this.messages.filter(msg => msg.id !== messageId);
                 });
 
                 // 监听连接错误
@@ -873,6 +923,25 @@ export default {
 
 .close-button:hover {
     transform: scale(1.05);
+}
+
+/* 留言容器样式 */
+.message-item {
+    position: relative;
+    padding-bottom: 30px;
+}
+
+/* 留言底部区域 */
+.message-footer {
+    position: absolute;
+    right: 10px;
+    bottom: 5px;
+}
+
+/* 删除按钮样式 */
+.delete-button {
+    padding: 2px 8px;
+    font-size: 12px;
 }
 
 /* 通知样式 */
